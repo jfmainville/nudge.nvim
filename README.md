@@ -4,14 +4,14 @@ An inline AI coding assistant for Neovim powered by Claude. Press `<leader>aa` t
 
 ## Features
 
-- **Inline prompt** — a small floating window appears at the centre of the screen; type and press `<Enter>`
-- **Streaming preview** — generated tokens appear as virtual-text below the cursor while the model is still writing
-- **Visual-mode replacement** — select code, press `<leader>aa`, describe what to change; the selection is replaced in-place
-- **Normal-mode insertion** — with no selection, new code is inserted below the cursor
-- **Live spinner** — a progress indicator shows while the request is in flight
+- **Inline prompt**: a small floating window appears at the centre of the screen; type and press `<Enter>`
+- **Streaming preview**: generated tokens appear as virtual-text below the cursor while the model is still writing
+- **Visual-mode replacement**: select code, press `<leader>aa`, describe what to change; the selection is replaced in-place
+- **Normal-mode insertion**: with no selection, new code is inserted below the cursor
+- **Live spinner**: a progress indicator shows while the request is in flight
 - **Two auth providers**
-  - `api_key` — direct Anthropic HTTPS API (pay-per-token)
-  - `claude_cli` — delegates to the `claude` CLI binary which handles OAuth for Claude Code / Pro subscriptions automatically
+  - `api_key`: direct Anthropic HTTPS API (pay-per-token)
+  - `claude_cli`: delegates to the `claude` CLI binary which handles OAuth for Claude Code / Pro subscriptions automatically
 
 ---
 
@@ -56,7 +56,7 @@ use {
 
 ## Configuration
 
-Call `require("nudge").setup(opts)` with any of the options below. All fields are optional — the table shows defaults.
+Call `require("nudge").setup(opts)` with any of the options below. All fields are optional, the table shows defaults.
 
 ````lua
 require("nudge").setup({
@@ -134,7 +134,7 @@ Authentication is handled entirely by the CLI. If you have logged in with:
 claude auth login
 ```
 
-…your active subscription (Claude Code subscription, API credits, etc.) is used automatically. No API key is needed in the plugin config.
+Your active subscription (Claude Code subscription, API credits, etc.) is used automatically. No API key is needed in the plugin config.
 
 > **Note:** The `claude_cli` provider does not stream tokens — it shows a spinner while the request runs and inserts the full response when done.
 
