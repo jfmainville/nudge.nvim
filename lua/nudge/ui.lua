@@ -164,9 +164,10 @@ end
 local function open_input_win(config)
 	local total_w = vim.o.columns
 	local total_h = vim.o.lines
-	local width = math.max(40, math.floor(total_w * config.ui.width))
-	local row = math.floor((total_h - 3) / 2)
-	local col = math.floor((total_w - width) / 2)
+	local width  = math.max(40, math.floor(total_w * config.ui.width))
+	local height = 4
+	local row    = math.floor((total_h - (height + 2)) / 2)
+	local col    = math.floor((total_w - width) / 2)
 
 	local buf = vim.api.nvim_create_buf(false, true)
 	vim.bo[buf].buftype = "nofile"
@@ -176,7 +177,7 @@ local function open_input_win(config)
 	local win = vim.api.nvim_open_win(buf, true, {
 		relative = "editor",
 		width = width,
-		height = 1,
+		height = height,
 		row = row,
 		col = col,
 		style = "minimal",
@@ -185,6 +186,9 @@ local function open_input_win(config)
 		title_pos = config.ui.title_pos,
 		noautocmd = true,
 	})
+
+	vim.wo[win].wrap      = true
+	vim.wo[win].linebreak = true
 
 	vim.cmd("startinsert")
 	return buf, win
