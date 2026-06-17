@@ -1,5 +1,6 @@
-local api      = require("nudge.api")
-local question = require("nudge.question")
+local api        = require("nudge.api")
+local ctx_module = require("nudge.context")
+local question   = require("nudge.question")
 
 local M = {}
 
@@ -253,7 +254,7 @@ function M.open_prompt(config, is_visual, vis_sr, vis_er)
 		end
 
 		if question.is_question(prompt) then
-			question.open(config, prompt, context, filetype, file_ctx)
+			question.open(config, prompt, context, filetype, file_ctx, ctx_module.get_file_contents())
 			return
 		end
 
@@ -263,7 +264,7 @@ function M.open_prompt(config, is_visual, vis_sr, vis_er)
 			vim.api.nvim_set_current_win(target_win)
 		end
 
-		local messages = api.build_messages(prompt, context or "", filetype, file_ctx)
+		local messages = api.build_messages(prompt, context or "", filetype, file_ctx, ctx_module.get_file_contents())
 		local spinner = Spinner.new(target_buf, cursor_row, config.ui.spinner_frames, config.ui.spinner_interval)
 		local preview_id = nil
 		local accumulated = ""

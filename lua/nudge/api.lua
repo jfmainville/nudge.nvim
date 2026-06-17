@@ -1,14 +1,23 @@
 local M = {}
 
 --- Build the messages array sent to the API.
----@param prompt string        User's instruction
----@param context string       Visual selection text (may be empty)
----@param filetype string      Buffer filetype
----@param file table|nil       { name: string, content: string, cursor_row: number }
+---@param prompt string          User's instruction
+---@param context string         Visual selection text (may be empty)
+---@param filetype string        Buffer filetype
+---@param file table|nil         { name: string, content: string, cursor_row: number }
+---@param context_files table|nil  List of { path, content, filetype } from context module
 ---@return table
-function M.build_messages(prompt, context, filetype, file)
+function M.build_messages(prompt, context, filetype, file, context_files)
 	local parts = {}
 	local ft = filetype or "text"
+
+	if context_files and #context_files > 0 then
+		for _, cf in ipairs(context_files) do
+			table.insert(parts, ("Context file: %s  (filetype: %s)"):format(cf.path, cf.filetype))
+			table.insert(parts, cf.content)
+			table.insert(parts, "---")
+		end
+	end
 
 	if file and file.content ~= "" then
 		local label = (file.name ~= "" and file.name) or "[No Name]"

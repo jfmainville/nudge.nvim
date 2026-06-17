@@ -1,6 +1,7 @@
 local config_module = require("nudge.config")
-local ui   = require("nudge.ui")
-local chat = require("nudge.chat")
+local ui      = require("nudge.ui")
+local chat    = require("nudge.chat")
+local context = require("nudge.context")
 
 local M = {}
 
@@ -23,6 +24,10 @@ function M._register_keymaps()
 	vim.keymap.set("n", M._config.keymaps.chat, function()
 		chat.open(M._config)
 	end, { desc = "Nudge: open chat" })
+
+	vim.keymap.set("n", M._config.keymaps.add_context, function()
+		context.open_picker(M._config)
+	end, { desc = "Nudge: manage context files" })
 
 	-- Visual mode ("x" = visual only, excludes select mode):
 	-- Capture the range NOW while still in visual mode, then exit.

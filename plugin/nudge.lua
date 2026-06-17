@@ -30,3 +30,15 @@ end, { desc = "Open Nudge chat window" })
 vim.api.nvim_create_user_command("NudgeChatClear", function()
 	require("nudge.chat").clear()
 end, { desc = "Clear Nudge chat history" })
+
+vim.api.nvim_create_user_command("NudgeContext", function()
+	local cfg = assert_setup()
+	if cfg then
+		require("nudge.context").open_picker(cfg)
+	end
+end, { desc = "Manage Nudge context files (telescope)" })
+
+vim.api.nvim_create_user_command("NudgeContextClear", function()
+	require("nudge.context").clear()
+	vim.notify("Nudge: context cleared", vim.log.levels.INFO)
+end, { desc = "Clear all Nudge context files" })
