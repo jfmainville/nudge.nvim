@@ -26,7 +26,7 @@ function M._register_keymaps()
 	end, { desc = "Nudge: open chat" })
 
 	vim.keymap.set("n", M._config.keymaps.add_context, function()
-		context.open_picker(M._config)
+		context.open_picker()
 	end, { desc = "Nudge: manage context files" })
 
 	-- Visual mode ("x" = visual only, excludes select mode):

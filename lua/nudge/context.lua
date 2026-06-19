@@ -31,7 +31,7 @@ end
 
 -- Return a shallow copy of the current context file paths
 function M.get_files()
-	return vim.list_slice(state.files, 1, #state.files)
+	return vim.list_extend({}, state.files)
 end
 
 -- Return file contents for inclusion in API messages
@@ -52,10 +52,12 @@ function M.get_file_contents()
 end
 
 -- ---------------------------------------------------------------------------
--- Telescope: add a single file to context
+-- Telescope pickers (module-private)
 -- ---------------------------------------------------------------------------
 
-function M._open_add_picker()
+local open_add_picker -- forward declaration (referenced by open_manager_picker)
+
+open_add_picker = function()
 	local actions = require("telescope.actions")
 	local action_state = require("telescope.actions.state")
 
@@ -83,11 +85,7 @@ function M._open_add_picker()
 	})
 end
 
--- ---------------------------------------------------------------------------
--- Telescope: manage existing context files
--- ---------------------------------------------------------------------------
-
-function M._open_manager_picker()
+local function open_manager_picker()
 	local pickers = require("telescope.pickers")
 	local finders = require("telescope.finders")
 	local conf = require("telescope.config").values
@@ -115,7 +113,6 @@ function M._open_manager_picker()
 			sorter = conf.generic_sorter({}),
 			previewer = conf.file_previewer({}),
 			attach_mappings = function(prompt_bufnr, map)
-				-- <CR>: open selected file in the editor
 				actions.select_default:replace(function()
 					local selection = action_state.get_selected_entry()
 					actions.close(prompt_bufnr)
@@ -130,17 +127,14 @@ function M._open_manager_picker()
 						return
 					end
 					M.remove(selection.value)
-					local current_picker = action_state.get_current_picker(prompt_bufnr)
 					local files = M.get_files()
 					if #files == 0 then
 						actions.close(prompt_bufnr)
 						vim.notify("Nudge: context is now empty", vim.log.levels.INFO)
 					else
-						current_picker:refresh(make_finder(), { reset_prompt = false })
+						action_state.get_current_picker(prompt_bufnr):refresh(make_finder(), { reset_prompt = false })
 						vim.notify(
-							("Nudge: removed from context: %s"):format(
-								vim.fn.fnamemodify(selection.value, ":t")
-							),
+							("Nudge: removed from context: %s"):format(vim.fn.fnamemodify(selection.value, ":t")),
 							vim.log.levels.INFO
 						)
 					end
@@ -154,20 +148,14 @@ function M._open_manager_picker()
 
 				local function add_new()
 					actions.close(prompt_bufnr)
-					M._open_add_picker()
+					open_add_picker()
 				end
 
-				-- <C-d>: remove selected file
-				map("i", "<C-d>", remove_selected)
-				map("n", "<C-d>", remove_selected)
-
-				-- <C-a>: clear all context files
-				map("i", "<C-a>", clear_all)
-				map("n", "<C-a>", clear_all)
-
-				-- <C-n>: add a new file to context
-				map("i", "<C-n>", add_new)
-				map("n", "<C-n>", add_new)
+				for _, mode in ipairs({ "i", "n" }) do
+					map(mode, "<C-d>", remove_selected)
+					map(mode, "<C-a>", clear_all)
+					map(mode, "<C-n>", add_new)
+				end
 
 				return true
 			end,
@@ -179,7 +167,7 @@ end
 -- Public: open the context picker (manager or add depending on state)
 -- ---------------------------------------------------------------------------
 
-function M.open_picker(_config)
+function M.open_picker()
 	local ok = pcall(require, "telescope")
 	if not ok then
 		vim.notify("Nudge: telescope.nvim is required for file context management", vim.log.levels.ERROR)
@@ -187,9 +175,9 @@ function M.open_picker(_config)
 	end
 
 	if #state.files == 0 then
-		M._open_add_picker()
+		open_add_picker()
 	else
-		M._open_manager_picker()
+		open_manager_picker()
 	end
 end
 

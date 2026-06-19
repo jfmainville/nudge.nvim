@@ -32,9 +32,8 @@ vim.api.nvim_create_user_command("NudgeChatClear", function()
 end, { desc = "Clear Nudge chat history" })
 
 vim.api.nvim_create_user_command("NudgeContext", function()
-	local cfg = assert_setup()
-	if cfg then
-		require("nudge.context").open_picker(cfg)
+	if assert_setup() then
+		require("nudge.context").open_picker()
 	end
 end, { desc = "Manage Nudge context files (telescope)" })
 
