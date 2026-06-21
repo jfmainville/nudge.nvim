@@ -2,7 +2,6 @@ local M = {}
 
 local state = { files = {} }
 
--- Add a file to context by absolute path (deduplicated)
 function M.add(filepath)
 	local abs = vim.fn.fnamemodify(filepath, ":p")
 	for _, f in ipairs(state.files) do
@@ -13,7 +12,6 @@ function M.add(filepath)
 	table.insert(state.files, abs)
 end
 
--- Remove a file from context by path
 function M.remove(filepath)
 	local abs = vim.fn.fnamemodify(filepath, ":p")
 	for i, f in ipairs(state.files) do
@@ -24,17 +22,14 @@ function M.remove(filepath)
 	end
 end
 
--- Clear all context files
 function M.clear()
 	state.files = {}
 end
 
--- Return a shallow copy of the current context file paths
 function M.get_files()
 	return vim.list_extend({}, state.files)
 end
 
--- Return file contents for inclusion in API messages
 function M.get_file_contents()
 	local results = {}
 	for _, filepath in ipairs(state.files) do
@@ -51,11 +46,7 @@ function M.get_file_contents()
 	return results
 end
 
--- ---------------------------------------------------------------------------
--- Telescope pickers (module-private)
--- ---------------------------------------------------------------------------
-
-local open_add_picker -- forward declaration (referenced by open_manager_picker)
+local open_add_picker
 
 open_add_picker = function()
 	local actions = require("telescope.actions")
@@ -162,10 +153,6 @@ local function open_manager_picker()
 		})
 		:find()
 end
-
--- ---------------------------------------------------------------------------
--- Public: open the context picker (manager or add depending on state)
--- ---------------------------------------------------------------------------
 
 function M.open_picker()
 	local ok = pcall(require, "telescope")

@@ -5,7 +5,6 @@ local M = {}
 ---@param context string         Visual selection text (may be empty)
 ---@param filetype string        Buffer filetype
 ---@param file table|nil         { name: string, content: string, cursor_row: number }
----@param context_files table|nil  List of { path, content, filetype } from context module
 ---@return table
 function M.build_messages(prompt, context, filetype, file, context_files)
 	local parts = {}

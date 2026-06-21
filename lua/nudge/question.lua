@@ -139,7 +139,6 @@ end
 ---@param context         string|nil  Visual selection text (may be nil/empty)
 ---@param filetype        string|nil  Buffer filetype
 ---@param file_ctx        table|nil   { name, content, cursor_row, sel_sr, sel_er, is_file_edit }
----@param context_files   table|nil   List of { path, content, filetype } from context module
 function M.open(config, initial_question, context, filetype, file_ctx, context_files)
 	_count = _count + 1
 	local AUGROUP = vim.api.nvim_create_augroup("nudge_question_" .. _count, { clear = true })
