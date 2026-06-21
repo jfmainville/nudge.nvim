@@ -53,8 +53,8 @@ open_add_picker = function()
 	local action_state = require("telescope.actions.state")
 
 	require("telescope.builtin").find_files({
-		prompt_title = "Add File to Context  <Tab> multi-select",
-		attach_mappings = function(prompt_bufnr, _)
+		prompt_title = "Add File to Context  <Tab> multi-select · <C-d> remove",
+		attach_mappings = function(prompt_bufnr, map)
 			actions.select_default:replace(function()
 				local picker = action_state.get_current_picker(prompt_bufnr)
 				local selections = picker:get_multi_selection()
@@ -76,6 +76,35 @@ open_add_picker = function()
 					)
 				end
 			end)
+
+			local function remove_from_context()
+				local entry = action_state.get_selected_entry()
+				if not entry then
+					return
+				end
+				local filepath = entry.path or vim.fn.fnamemodify(entry.value or entry[1], ":p")
+				local before = #state.files
+				M.remove(filepath)
+				if #state.files < before then
+					vim.notify(
+						("Nudge: removed from context: %s (%d remaining)"):format(
+							vim.fn.fnamemodify(filepath, ":t"),
+							#state.files
+						),
+						vim.log.levels.INFO
+					)
+				else
+					vim.notify(
+						("Nudge: %s is not in context"):format(vim.fn.fnamemodify(filepath, ":t")),
+						vim.log.levels.WARN
+					)
+				end
+			end
+
+			for _, mode in ipairs({ "i", "n" }) do
+				map(mode, "<C-d>", remove_from_context)
+			end
+
 			return true
 		end,
 	})
