@@ -53,23 +53,28 @@ open_add_picker = function()
 	local action_state = require("telescope.actions.state")
 
 	require("telescope.builtin").find_files({
-		prompt_title = "Add File to Context",
+		prompt_title = "Add File to Context  <Tab> multi-select",
 		attach_mappings = function(prompt_bufnr, _)
 			actions.select_default:replace(function()
-				local selection = action_state.get_selected_entry()
-				actions.close(prompt_bufnr)
-				if not selection then
-					return
+				local picker = action_state.get_current_picker(prompt_bufnr)
+				local selections = picker:get_multi_selection()
+				if #selections == 0 then
+					local entry = action_state.get_selected_entry()
+					if entry then
+						selections = { entry }
+					end
 				end
-				local filepath = selection.path or vim.fn.fnamemodify(selection.value or selection[1], ":p")
-				M.add(filepath)
-				vim.notify(
-					("Nudge: added to context: %s (%d files)"):format(
-						vim.fn.fnamemodify(filepath, ":t"),
-						#state.files
-					),
-					vim.log.levels.INFO
-				)
+				actions.close(prompt_bufnr)
+				for _, entry in ipairs(selections) do
+					local filepath = entry.path or vim.fn.fnamemodify(entry.value or entry[1], ":p")
+					M.add(filepath)
+				end
+				if #selections > 0 then
+					vim.notify(
+						("Nudge: added %d file(s) to context (%d total)"):format(#selections, #state.files),
+						vim.log.levels.INFO
+					)
+				end
 			end)
 			return true
 		end,
