@@ -101,9 +101,17 @@ local function render_header(buf, role, model)
 end
 
 -- Build the initial user message that includes file / selection context.
-local function build_initial_content(question_text, context, filetype, file_ctx)
+local function build_initial_content(question_text, context, filetype, file_ctx, context_files)
 	local parts = {}
 	local ft    = filetype or "text"
+
+	if context_files and #context_files > 0 then
+		for _, cf in ipairs(context_files) do
+			table.insert(parts, ("Context file: %s  (filetype: %s)"):format(cf.path, cf.filetype))
+			table.insert(parts, cf.content)
+			table.insert(parts, "---")
+		end
+	end
 
 	if file_ctx and file_ctx.content ~= "" then
 		local label = (file_ctx.name ~= "" and file_ctx.name) or "[No Name]"
@@ -126,12 +134,12 @@ end
 -- Open
 -- ---------------------------------------------------------------------------
 
----@param config    table   Resolved nudge config
----@param initial_question string  The question to kick off the session
----@param context   string|nil     Visual selection text (may be nil/empty)
----@param filetype  string|nil     Buffer filetype
----@param file_ctx  table|nil      { name, content, cursor_row, sel_sr, sel_er, is_file_edit }
-function M.open(config, initial_question, context, filetype, file_ctx)
+---@param config          table       Resolved nudge config
+---@param initial_question string     The question to kick off the session
+---@param context         string|nil  Visual selection text (may be nil/empty)
+---@param filetype        string|nil  Buffer filetype
+---@param file_ctx        table|nil   { name, content, cursor_row, sel_sr, sel_er, is_file_edit }
+function M.open(config, initial_question, context, filetype, file_ctx, context_files)
 	_count = _count + 1
 	local AUGROUP = vim.api.nvim_create_augroup("nudge_question_" .. _count, { clear = true })
 
@@ -375,7 +383,7 @@ function M.open(config, initial_question, context, filetype, file_ctx)
 	-- Kick off the initial question
 	-- -------------------------------------------------------------------------
 
-	local initial_content = build_initial_content(initial_question, context, filetype, file_ctx)
+	local initial_content = build_initial_content(initial_question, context, filetype, file_ctx, context_files)
 	table.insert(state.history, { role = "user", content = initial_content })
 
 	vim.cmd("startinsert")

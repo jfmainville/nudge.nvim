@@ -1,6 +1,6 @@
 # nudge.nvim
 
-An inline AI coding assistant for Neovim powered by Claude. Press `<leader>aa` to open a floating prompt, type your instruction, and watch the generated code appear directly in your buffer — no side panels, no context switching.
+An inline AI coding assistant for Neovim powered by Claude. Press `<leader>aa` to open a floating prompt, type your instruction, and watch the generated code appear directly in your buffer, with no side panels and no context switching.
 
 ## Features
 
@@ -9,6 +9,8 @@ An inline AI coding assistant for Neovim powered by Claude. Press `<leader>aa` t
 - **Visual-mode replacement**: select code, press `<leader>aa`, describe what to change; the selection is replaced in-place
 - **Normal-mode insertion**: with no selection, new code is inserted below the cursor
 - **Live spinner**: a progress indicator shows while the request is in flight
+- **Chat mode**: a persistent two-pane window for multi-turn conversations with the model
+- **File context**: attach additional files to every AI request via telescope so the model is aware of code outside the current buffer
 - **Two auth providers**
   - `api_key`: direct Anthropic HTTPS API (pay-per-token)
   - `claude_cli`: delegates to the `claude` CLI binary which handles OAuth for Claude Code / Pro subscriptions automatically
@@ -17,9 +19,10 @@ An inline AI coding assistant for Neovim powered by Claude. Press `<leader>aa` t
 
 ## Requirements
 
-- Neovim ≥ 0.9
+- Neovim >= 0.9
 - `curl` (for the `api_key` provider)
 - **OR** the [Claude Code CLI](https://code.claude.com) logged in via `claude auth login` (for the `claude_cli` provider)
+- [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) (for file context management)
 
 ---
 
@@ -30,6 +33,7 @@ An inline AI coding assistant for Neovim powered by Claude. Press `<leader>aa` t
 ```lua
 {
   "jfmainville/nudge.nvim",
+  dependencies = { "nvim-telescope/telescope.nvim" },
   config = function()
     require("nudge").setup({
       auth = {
@@ -46,6 +50,7 @@ An inline AI coding assistant for Neovim powered by Claude. Press `<leader>aa` t
 ```lua
 use {
   "jfmainville/nudge.nvim",
+  requires = { "nvim-telescope/telescope.nvim" },
   config = function()
     require("nudge").setup()
   end,
@@ -64,7 +69,7 @@ require("nudge").setup({
   -- Authentication --------------------------------------------------------
   auth = {
     -- "api_key"   : calls the Anthropic API directly with curl
-    -- "claude_cli": runs `claude -p "…"` which uses your logged-in session
+    -- "claude_cli": runs `claude --print "..."` which uses your logged-in session
     provider = "api_key",
 
     -- API key for the "api_key" provider.
@@ -73,29 +78,31 @@ require("nudge").setup({
   },
 
   -- Model to use (passed verbatim to whichever provider is active) --------
-  model = "claude-opus-4-5",
+  model = "claude-sonnet-4-6",
 
   -- Maximum tokens in the model response ---------------------------------
   max_tokens = 8192,
 
   -- Keymaps ---------------------------------------------------------------
   keymaps = {
-    prompt = "<leader>aa",  -- open the prompt (normal + visual)
-    submit = "<CR>",        -- confirm prompt in the input window
-    close  = "<Esc>",       -- dismiss the input window
+    prompt      = "<leader>aa",  -- open the inline prompt (normal + visual)
+    chat        = "<leader>ac",  -- open the persistent chat window
+    add_context = "<leader>af",  -- add or manage context files via telescope
+    submit      = "<CR>",        -- confirm in the input window
+    close       = "<Esc>",       -- dismiss the input window
   },
 
   -- UI tweaks -------------------------------------------------------------
   ui = {
-    border          = "rounded",   -- any nvim_open_win border style
-    title           = " Nudge ",
-    title_pos       = "center",
-    width           = 0.6,         -- fraction of editor columns
-    spinner_frames  = { "⠋","⠙","⠹","⠸","⠼","⠴","⠦","⠧","⠇","⠏" },
-    spinner_interval = 80,         -- ms between spinner frames
+    border           = "rounded",   -- any nvim_open_win border style
+    title            = " Nudge ",
+    title_pos        = "center",
+    width            = 0.6,         -- fraction of editor columns
+    spinner_frames   = { "⠋","⠙","⠹","⠸","⠼","⠴","⠦","⠧","⠇","⠏" },
+    spinner_interval = 80,          -- ms between spinner frames
   },
 
-  -- System prompt sent on every request ----------------------------------
+  -- System prompt sent on every inline-prompt and question request --------
   -- Override to add project-specific instructions.
   system_prompt = [[
 You are an expert coding assistant embedded inside a code editor.
@@ -103,6 +110,14 @@ When generating or modifying code, output ONLY the raw code.
 Do NOT wrap the output in markdown code fences (``` blocks).
 Do NOT add explanations, comments, or any text beyond the code itself.
 Preserve the indentation style of any code provided as context.
+  ]],
+
+  -- System prompt used in the chat and question windows ------------------
+  chat_system_prompt = [[
+You are a helpful coding assistant integrated into a code editor.
+Answer questions clearly and concisely.
+You may use markdown formatting in your responses, including code blocks.
+Keep your answers focused and practical.
   ]],
 })
 ````
@@ -136,20 +151,45 @@ claude auth login
 
 Your active subscription (Claude Code subscription, API credits, etc.) is used automatically. No API key is needed in the plugin config.
 
-> **Note:** The `claude_cli` provider does not stream tokens — it shows a spinner while the request runs and inserts the full response when done.
+> **Note:** The `claude_cli` provider does not stream tokens. It shows a spinner while the request runs and inserts the full response when done.
 
 ---
 
 ## Usage
 
-| Mode   | Keys         | Behaviour                                                |
-| ------ | ------------ | -------------------------------------------------------- |
-| Normal | `<leader>aa` | Open prompt → insert generated code below the cursor     |
-| Visual | `<leader>aa` | Open prompt → replace selected lines with generated code |
-| Input  | `<Enter>`    | Submit the prompt                                        |
-| Input  | `<Esc>`      | Cancel                                                   |
+| Mode   | Keys         | Behaviour                                                      |
+| ------ | ------------ | -------------------------------------------------------------- |
+| Normal | `<leader>aa` | Open inline prompt, insert generated code below the cursor     |
+| Visual | `<leader>aa` | Open inline prompt, replace selected lines with generated code |
+| Normal | `<leader>ac` | Open the persistent chat window                                |
+| Normal | `<leader>af` | Add files to context or manage the current context file list   |
+| Input  | `<Enter>`    | Submit the prompt                                              |
+| Input  | `<Esc>`      | Cancel or close the window                                     |
 
-A `:Nudge` command is also registered after `setup()`.
+### Commands
+
+| Command              | Description                                        |
+| -------------------- | -------------------------------------------------- |
+| `:Nudge`             | Open the inline AI prompt                          |
+| `:NudgeChat`         | Open the persistent chat window                    |
+| `:NudgeChatClear`    | Clear the chat history for the current session     |
+| `:NudgeContext`      | Add or manage context files via telescope          |
+| `:NudgeContextClear` | Clear all context files without opening telescope  |
+
+### File context
+
+Use `<leader>af` (or `:NudgeContext`) to attach additional files to every AI request. The contents of all context files are prepended to the prompt, giving the model awareness of code that lives outside the buffer you are currently editing.
+
+When no files are loaded, the telescope file picker opens so you can add one immediately. When files are already loaded, a context-manager picker appears instead:
+
+| Key     | Action                                         |
+| ------- | ---------------------------------------------- |
+| `<CR>`  | Open the selected file in the editor           |
+| `<C-d>` | Remove the selected file from the context      |
+| `<C-a>` | Clear all context files and close the picker   |
+| `<C-n>` | Add another file, switches to the file picker  |
+
+Context files persist for the duration of the Neovim session. Use `:NudgeContextClear` to reset them at any time.
 
 ### Examples
 
@@ -173,6 +213,10 @@ convert to use async/await and add proper error handling
 
 Press `<Enter>`. The selection is replaced.
 
+**Chat with the model**
+
+Press `<leader>ac` to open the chat window. Ask questions about the current file, architecture decisions, or anything else. The conversation persists across open and close until you call `:NudgeChatClear` or restart Neovim.
+
 ---
 
 ## Running tests
@@ -194,6 +238,6 @@ nvim --headless --noplugin -u tests/minimal_init.lua \
 
 ## Contributing
 
-1. Keep modules focused, `config.lua`, `api.lua`, `ui.lua` each own one concern.
+1. Keep modules focused. `config.lua`, `api.lua`, `ui.lua` each own one concern.
 2. Run `make lint` and `make test` before opening a PR.
 3. No external Lua runtime dependencies beyond `plenary` for tests.

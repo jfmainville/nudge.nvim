@@ -11,10 +11,11 @@ M.defaults = {
 	model = "claude-sonnet-4-6",
 	max_tokens = 8192,
 	keymaps = {
-		prompt = "<leader>aa",
-		chat   = "<leader>ac",
-		submit = "<CR>",
-		close  = "<Esc>",
+		prompt      = "<leader>aa",
+		chat        = "<leader>ac",
+		add_context = "<leader>af",
+		submit      = "<CR>",
+		close       = "<Esc>",
 	},
 	ui = {
 		border = "rounded",
