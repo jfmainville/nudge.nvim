@@ -19,7 +19,7 @@ An inline AI coding assistant for Neovim powered by Claude. Press `<leader>aa` t
 
 ## Requirements
 
-- Neovim >= 0.9
+- Neovim >= 0.11
 - `curl` (for the `api_key` provider)
 - **OR** the [Claude Code CLI](https://code.claude.com) logged in via `claude auth login` (for the `claude_cli` provider)
 - [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) (for file context management)
@@ -168,13 +168,13 @@ Your active subscription (Claude Code subscription, API credits, etc.) is used a
 
 ### Commands
 
-| Command              | Description                                        |
-| -------------------- | -------------------------------------------------- |
-| `:Nudge`             | Open the inline AI prompt                          |
-| `:NudgeChat`         | Open the persistent chat window                    |
-| `:NudgeChatClear`    | Clear the chat history for the current session     |
-| `:NudgeContext`      | Add or manage context files via telescope          |
-| `:NudgeContextClear` | Clear all context files without opening telescope  |
+| Command              | Description                                       |
+| -------------------- | ------------------------------------------------- |
+| `:Nudge`             | Open the inline AI prompt                         |
+| `:NudgeChat`         | Open the persistent chat window                   |
+| `:NudgeChatClear`    | Clear the chat history for the current session    |
+| `:NudgeContext`      | Add or manage context files via telescope         |
+| `:NudgeContextClear` | Clear all context files without opening telescope |
 
 ### File context
 
@@ -182,12 +182,12 @@ Use `<leader>af` (or `:NudgeContext`) to attach additional files to every AI req
 
 When no files are loaded, the telescope file picker opens so you can add one immediately. When files are already loaded, a context-manager picker appears instead:
 
-| Key     | Action                                         |
-| ------- | ---------------------------------------------- |
-| `<CR>`  | Open the selected file in the editor           |
-| `<C-d>` | Remove the selected file from the context      |
-| `<C-a>` | Clear all context files and close the picker   |
-| `<C-n>` | Add another file, switches to the file picker  |
+| Key     | Action                                        |
+| ------- | --------------------------------------------- |
+| `<CR>`  | Open the selected file in the editor          |
+| `<C-d>` | Remove the selected file from the context     |
+| `<C-a>` | Clear all context files and close the picker  |
+| `<C-n>` | Add another file, switches to the file picker |
 
 Context files persist for the duration of the Neovim session. Use `:NudgeContextClear` to reset them at any time.
 
