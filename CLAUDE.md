@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Prerequisites
 
-- **Neovim** >= 0.9
+- **Neovim** >= 0.11
 - **luacheck** — Lua static analyser (install via your OS package manager or luarocks)
 - **stylua** — Lua formatter (install via `cargo install stylua` or from GitHub releases)
 - **plenary.nvim** — required to run the test suite (installed by your Neovim plugin manager, e.g. lazy.nvim)
@@ -13,9 +13,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Environment Variables
 
-| Variable            | Description                                              |
-| ------------------- | -------------------------------------------------------- |
-| `ANTHROPIC_API_KEY` | Anthropic API key for the `api_key` auth provider        |
+| Variable            | Description                                       |
+| ------------------- | ------------------------------------------------- |
+| `ANTHROPIC_API_KEY` | Anthropic API key for the `api_key` auth provider |
 
 ## Commands
 
@@ -39,16 +39,16 @@ nvim --headless --noplugin -u tests/minimal_init.lua \
 
 ### Module Layout
 
-| Path                    | Responsibility                                                          |
-| ----------------------- | ----------------------------------------------------------------------- |
-| `plugin/nudge.lua`      | Entry point; registers all `vim.api.nvim_create_user_command` commands  |
-| `lua/nudge/init.lua`    | Public `setup()` function; stores resolved config in `nudge._config`    |
-| `lua/nudge/config.lua`  | Default config values and validation                                    |
-| `lua/nudge/api.lua`     | Anthropic API calls (`api_key` provider) and `claude` CLI calls (`claude_cli` provider) |
-| `lua/nudge/ui.lua`      | Floating prompt window, streaming virtual-text preview, spinner         |
-| `lua/nudge/chat.lua`    | Persistent two-pane chat window and conversation history                |
-| `lua/nudge/context.lua` | File context management via telescope (add / remove / clear)            |
-| `lua/nudge/question.lua`| Question/answer mode                                                    |
+| Path                     | Responsibility                                                                          |
+| ------------------------ | --------------------------------------------------------------------------------------- |
+| `plugin/nudge.lua`       | Entry point; registers all `vim.api.nvim_create_user_command` commands                  |
+| `lua/nudge/init.lua`     | Public `setup()` function; stores resolved config in `nudge._config`                    |
+| `lua/nudge/config.lua`   | Default config values and validation                                                    |
+| `lua/nudge/api.lua`      | Anthropic API calls (`api_key` provider) and `claude` CLI calls (`claude_cli` provider) |
+| `lua/nudge/ui.lua`       | Floating prompt window, streaming virtual-text preview, spinner                         |
+| `lua/nudge/chat.lua`     | Persistent two-pane chat window and conversation history                                |
+| `lua/nudge/context.lua`  | File context management via telescope (add / remove / clear)                            |
+| `lua/nudge/question.lua` | Question/answer mode                                                                    |
 
 ### Auth Providers
 
