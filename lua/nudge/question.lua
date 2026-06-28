@@ -1,4 +1,5 @@
-local api = require("nudge.api")
+local api        = require("nudge.api")
+local Typewriter = require("nudge.typewriter")
 
 local M = {}
 
@@ -272,7 +273,13 @@ function M.open(config, initial_question, context, filetype, file_ctx, context_f
 		scroll_bot(state.chat_win, state.chat_buf)
 
 		state.stream_start = begin_stream()
-		local accumulated  = ""
+
+		local tw = Typewriter.new(function(text)
+			update_stream(text)
+		end, {
+			chars_per_tick = config.ui.typewriter_chars_per_tick,
+			interval       = config.ui.typewriter_interval,
+		})
 
 		local q_cfg = vim.tbl_extend("force", config, {
 			system_prompt = config.chat_system_prompt,
@@ -282,17 +289,19 @@ function M.open(config, initial_question, context, filetype, file_ctx, context_f
 			q_cfg,
 			api_messages,
 			function(token)
-				accumulated = accumulated .. token
-				update_stream(accumulated)
+				tw:push(token)
 			end,
 			function()
-				state.stream_job   = nil
-				state.stream_start = nil
-				table.insert(state.history, { role = "assistant", content = accumulated })
+				state.stream_job = nil
+				tw:finish(function(full_text)
+					state.stream_start = nil
+					table.insert(state.history, { role = "assistant", content = full_text })
+				end)
 			end,
 			function(err)
 				state.stream_job   = nil
 				state.stream_start = nil
+				tw:abort()
 				set_mod(state.chat_buf, true)
 				local err_row = buf_append(state.chat_buf, { "", "⚠  " .. err })
 				hl_line(state.chat_buf, err_row + 1, HL.err)

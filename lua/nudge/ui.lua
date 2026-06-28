@@ -1,6 +1,7 @@
 local api        = require("nudge.api")
 local ctx_module = require("nudge.context")
 local question   = require("nudge.question")
+local Typewriter = require("nudge.typewriter")
 
 local M = {}
 
@@ -269,20 +270,28 @@ function M.open_prompt(config, is_visual, vis_sr, vis_er)
 		local messages = api.build_messages(prompt, context or "", filetype, file_ctx, context_files)
 		local spinner = Spinner.new(target_buf, cursor_row, config.ui.spinner_frames, config.ui.spinner_interval)
 		local preview_id = nil
-		local accumulated = ""
 
-		api.stream(config, messages, function(token)
-			accumulated = accumulated .. token
+		local tw = Typewriter.new(function(text)
 			-- Skip streaming preview for whole-file edits — too noisy
 			if mode ~= "replace_buffer" then
-				preview_id = set_preview(target_buf, cursor_row, accumulated, preview_id)
+				preview_id = set_preview(target_buf, cursor_row, text, preview_id)
 			end
+		end, {
+			chars_per_tick = config.ui.typewriter_chars_per_tick,
+			interval       = config.ui.typewriter_interval,
+		})
+
+		api.stream(config, messages, function(token)
+			tw:push(token)
 		end, function()
 			spinner:stop()
-			clear_mark(target_buf, preview_id)
-			apply_result(target_buf, accumulated, mode, sel_sr, sel_er, cursor_row)
+			tw:finish(function(full_text)
+				clear_mark(target_buf, preview_id)
+				apply_result(target_buf, full_text, mode, sel_sr, sel_er, cursor_row)
+			end)
 		end, function(err)
 			spinner:stop()
+			tw:abort()
 			clear_mark(target_buf, preview_id)
 			vim.notify("Nudge: " .. err, vim.log.levels.ERROR)
 		end)
