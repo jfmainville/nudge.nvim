@@ -24,7 +24,7 @@ M.defaults = {
 		width = 0.6,
 		spinner_frames = { "⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏" },
 		spinner_interval = 80,
-		typewriter_chars_per_tick = 4,
+		typewriter_chars_per_tick = 2,
 		typewriter_interval = 16, -- ~60 fps
 	},
 	chat_system_prompt = table.concat({
