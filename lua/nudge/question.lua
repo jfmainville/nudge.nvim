@@ -1,5 +1,5 @@
 local api        = require("nudge.api")
-local Typewriter = require("nudge.typewriter")
+local typewriter = require("nudge.typewriter")
 
 local M = {}
 
@@ -274,7 +274,7 @@ function M.open(config, initial_question, context, filetype, file_ctx, context_f
 
 		state.stream_start = begin_stream()
 
-		local tw = Typewriter.new(function(text)
+		local typewriter_instance = typewriter.new(function(text)
 			update_stream(text)
 		end, {
 			chars_per_tick = config.ui.typewriter_chars_per_tick,
@@ -289,11 +289,11 @@ function M.open(config, initial_question, context, filetype, file_ctx, context_f
 			q_cfg,
 			api_messages,
 			function(token)
-				tw:push(token)
+				typewriter_instance:push(token)
 			end,
 			function()
 				state.stream_job = nil
-				tw:finish(function(full_text)
+				typewriter_instance:finish(function(full_text)
 					state.stream_start = nil
 					table.insert(state.history, { role = "assistant", content = full_text })
 				end)
@@ -301,7 +301,7 @@ function M.open(config, initial_question, context, filetype, file_ctx, context_f
 			function(err)
 				state.stream_job   = nil
 				state.stream_start = nil
-				tw:abort()
+				typewriter_instance:abort()
 				set_mod(state.chat_buf, true)
 				local err_row = buf_append(state.chat_buf, { "", "⚠  " .. err })
 				hl_line(state.chat_buf, err_row + 1, HL.err)
