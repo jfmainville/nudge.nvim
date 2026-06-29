@@ -272,7 +272,6 @@ function M.open_prompt(config, is_visual, vis_sr, vis_er)
 		local preview_id = nil
 
 		local typewriter_instance = typewriter.new(function(text)
-			-- Skip streaming preview for whole-file edits — too noisy
 			if mode ~= "replace_buffer" then
 				preview_id = set_preview(target_buf, cursor_row, text, preview_id)
 			end
