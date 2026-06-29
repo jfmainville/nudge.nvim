@@ -24,7 +24,6 @@ function M:push(text)
 	end
 end
 
--- on_complete(full_text) fires once the queue is drained and all text is visible.
 function M:finish(on_complete)
 	self._done        = true
 	self._on_complete = on_complete
