@@ -24,6 +24,8 @@ M.defaults = {
 		width = 0.6,
 		spinner_frames = { "⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏" },
 		spinner_interval = 80,
+		typewriter_chars_per_tick = 2,
+		typewriter_interval = 16,
 	},
 	chat_system_prompt = table.concat({
 		"You are a helpful coding assistant integrated into a code editor.",

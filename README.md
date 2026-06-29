@@ -5,7 +5,7 @@ An inline AI coding assistant for Neovim powered by Claude. Press `<leader>aa` t
 ## Features
 
 - **Inline prompt**: a small floating window appears at the centre of the screen; type and press `<Enter>`
-- **Streaming preview**: generated tokens appear as virtual-text below the cursor while the model is still writing
+- **Streaming preview**: generated tokens appear as virtual-text below the cursor while the model is still writing, revealed with a smooth typewriter animation
 - **Visual-mode replacement**: select code, press `<leader>aa`, describe what to change; the selection is replaced in-place
 - **Normal-mode insertion**: with no selection, new code is inserted below the cursor
 - **Live spinner**: a progress indicator shows while the request is in flight
@@ -100,6 +100,11 @@ require("nudge").setup({
     width            = 0.6,         -- fraction of editor columns
     spinner_frames   = { "⠋","⠙","⠹","⠸","⠼","⠴","⠦","⠧","⠇","⠏" },
     spinner_interval = 80,          -- ms between spinner frames
+
+    -- Typewriter effect: AI output is revealed at a fixed character rate,
+    -- similar to ChatGPT. Increase chars_per_tick to speed up, decrease to slow down.
+    typewriter_chars_per_tick = 2,  -- characters revealed per timer tick
+    typewriter_interval       = 16, -- ms between ticks
   },
 
   -- System prompt sent on every inline-prompt and question request --------
