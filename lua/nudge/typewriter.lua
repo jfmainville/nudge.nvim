@@ -1,5 +1,3 @@
--- Typewriter: reveals streamed text at a fixed character rate.
-
 local M = {}
 M.__index = M
 
@@ -11,8 +9,6 @@ function M.new(render_fn, opts)
 		interval       = opts.interval or 16,
 		pending        = "",
 		displayed      = "",
-		_done          = false,
-		_on_complete   = nil,
 		_timer         = nil,
 	}, M)
 end
@@ -20,7 +16,9 @@ end
 function M:push(text)
 	self.pending = self.pending .. text
 	if not self._timer then
-		self:_start()
+		self._timer = vim.fn.timer_start(self.interval, function()
+			self:_tick()
+		end, { ["repeat"] = -1 })
 	end
 end
 
@@ -39,16 +37,6 @@ function M:abort()
 	end
 end
 
-function M:current()
-	return self.displayed
-end
-
-function M:_start()
-	self._timer = vim.fn.timer_start(self.interval, function()
-		self:_tick()
-	end, { ["repeat"] = -1 })
-end
-
 function M:_tick()
 	if self.pending == "" then
 		if self._done then
@@ -59,9 +47,8 @@ function M:_tick()
 		return
 	end
 
-	local chunk    = self.pending:sub(1, self.chars_per_tick)
+	self.displayed = self.displayed .. self.pending:sub(1, self.chars_per_tick)
 	self.pending   = self.pending:sub(self.chars_per_tick + 1)
-	self.displayed = self.displayed .. chunk
 	self.render_fn(self.displayed)
 end
 
