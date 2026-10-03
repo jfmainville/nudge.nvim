@@ -1,6 +1,6 @@
 # nudge.nvim
 
-An inline AI coding assistant for Neovim powered by Claude. Press `<leader>aa` to open a floating prompt, type your instruction, and watch the generated code appear directly in your buffer, with no side panels and no context switching.
+An inline AI coding assistant for Neovim. Press `<leader>aa` to open a floating prompt, type your instruction, and watch the generated code appear directly in your buffer, with no side panels and no context switching.
 
 ## Features
 
@@ -12,8 +12,8 @@ An inline AI coding assistant for Neovim powered by Claude. Press `<leader>aa` t
 - **Chat mode**: a persistent two-pane window for multi-turn conversations with the model
 - **File context**: attach additional files to every AI request via telescope so the model is aware of code outside the current buffer
 - **Two auth providers**
-  - `api_key`: direct Anthropic HTTPS API (pay-per-token)
-  - `claude_cli`: delegates to the `claude` CLI binary which handles OAuth for Claude Code / Pro subscriptions automatically
+  - `api_key`: direct HTTPS API access (pay-per-token)
+  - `claude_cli`: delegates to the `claude` CLI binary which handles OAuth for your CLI subscription automatically
 
 ---
 
@@ -21,7 +21,7 @@ An inline AI coding assistant for Neovim powered by Claude. Press `<leader>aa` t
 
 - Neovim >= 0.11
 - `curl` (for the `api_key` provider)
-- **OR** the [Claude Code CLI](https://code.claude.com) logged in via `claude auth login` (for the `claude_cli` provider)
+- **OR** the CLI tool logged in via `claude auth login` (for the `claude_cli` provider)
 - [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) (for file context management)
 
 ---
@@ -68,7 +68,7 @@ require("nudge").setup({
 
   -- Authentication --------------------------------------------------------
   auth = {
-    -- "api_key"   : calls the Anthropic API directly with curl
+    -- "api_key"   : calls the API directly with curl
     -- "claude_cli": runs `claude --print "..."` which uses your logged-in session
     provider = "api_key",
 
@@ -133,7 +133,7 @@ Uses `curl` to call `https://api.anthropic.com/v1/messages` with SSE streaming. 
 - `auth.api_key = "sk-ant-..."` in the config, **or**
 - `export ANTHROPIC_API_KEY=sk-ant-...` in your shell environment.
 
-Billed against your [Anthropic API](https://console.anthropic.com) account.
+Billed against your API account.
 
 ### `claude_cli` (OAuth / Pro subscription)
 
