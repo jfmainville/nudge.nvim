@@ -21,7 +21,7 @@ An inline AI coding assistant for Neovim. Press `<leader>aa` to open a floating 
 
 - Neovim >= 0.11
 - `curl` (for the `api_key` provider)
-- **OR** the [CLI tool](https://code.claude.com) logged in via `claude auth login` (for the `claude_cli` provider)
+- **OR** the CLI tool logged in via `claude auth login` (for the `claude_cli` provider)
 - [telescope.nvim](https://github.com/nvim-telescope/telescope.nvim) (for file context management)
 
 ---
@@ -133,7 +133,7 @@ Uses `curl` to call `https://api.anthropic.com/v1/messages` with SSE streaming. 
 - `auth.api_key = "sk-ant-..."` in the config, **or**
 - `export ANTHROPIC_API_KEY=sk-ant-...` in your shell environment.
 
-Billed against your [API](https://console.anthropic.com) account.
+Billed against your API account.
 
 ### `claude_cli` (OAuth / Pro subscription)
 
@@ -149,7 +149,7 @@ Authentication is handled entirely by the CLI. If you have logged in with:
 claude auth login
 ```
 
-Your active subscription (CLI subscription, API credits, etc.) is used automatically. No API key is needed in the plugin config.
+Your active subscription (Claude Code subscription, API credits, etc.) is used automatically. No API key is needed in the plugin config.
 
 > **Note:** The `claude_cli` provider does not stream tokens. It shows a spinner while the request runs and inserts the full response when done.
 
