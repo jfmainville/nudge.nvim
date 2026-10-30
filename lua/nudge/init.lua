@@ -1,6 +1,6 @@
 local config_module = require("nudge.config")
-local ui      = require("nudge.ui")
-local chat    = require("nudge.chat")
+local ui = require("nudge.ui")
+local chat = require("nudge.chat")
 local context = require("nudge.context")
 
 local M = {}

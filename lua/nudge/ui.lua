@@ -1,6 +1,6 @@
-local api        = require("nudge.api")
+local api = require("nudge.api")
 local ctx_module = require("nudge.context")
-local question   = require("nudge.question")
+local question = require("nudge.question")
 
 local M = {}
 
@@ -165,10 +165,10 @@ end
 local function open_input_win(config)
 	local total_w = vim.o.columns
 	local total_h = vim.o.lines
-	local width  = math.max(40, math.floor(total_w * config.ui.width))
+	local width = math.max(40, math.floor(total_w * config.ui.width))
 	local height = 4
-	local row    = math.floor((total_h - (height + 2)) / 2)
-	local col    = math.floor((total_w - width) / 2)
+	local row = math.floor((total_h - (height + 2)) / 2)
+	local col = math.floor((total_w - width) / 2)
 
 	local buf = vim.api.nvim_create_buf(false, true)
 	vim.bo[buf].buftype = "nofile"
@@ -188,7 +188,7 @@ local function open_input_win(config)
 		noautocmd = true,
 	})
 
-	vim.wo[win].wrap      = true
+	vim.wo[win].wrap = true
 	vim.wo[win].linebreak = true
 
 	vim.cmd("startinsert")
