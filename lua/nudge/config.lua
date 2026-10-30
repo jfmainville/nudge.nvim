@@ -11,11 +11,14 @@ M.defaults = {
 	model = "claude-sonnet-4-6",
 	max_tokens = 8192,
 	keymaps = {
-		prompt      = "<leader>aa",
-		chat        = "<leader>ac",
+		prompt = "<leader>aa",
+		chat = "<leader>ac",
 		add_context = "<leader>af",
-		submit      = "<CR>",
-		close       = "<Esc>",
+		explain = "<leader>ae",
+		spellcheck = "<leader>as",
+		improve = "<leader>ai",
+		submit = "<CR>",
+		close = "<Esc>",
 	},
 	ui = {
 		border = "rounded",
@@ -24,6 +27,11 @@ M.defaults = {
 		width = 0.6,
 		spinner_frames = { "⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏" },
 		spinner_interval = 80,
+	},
+	prompts = {
+		explain = "Explain what this code does.",
+		spellcheck = "Fix any spelling or grammar mistakes in comments, strings, and identifiers.",
+		improve = "Improve this code for clarity and readability without changing its behavior.",
 	},
 	chat_system_prompt = table.concat({
 		"You are a helpful coding assistant integrated into a code editor.",

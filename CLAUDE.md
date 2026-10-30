@@ -59,15 +59,26 @@ nvim --headless --noplugin -u tests/minimal_init.lua \
 
 Tests live in `tests/spec/` and use [plenary.nvim](https://github.com/nvim-lua/plenary.nvim) busted runner. The `tests/minimal_init.lua` bootstraps the plugin and locates plenary from standard lazy/packer/vim-plug paths.
 
-## Git Conventions
+### Additional Recommendations
 
-### Branch Naming
+- **No external Lua runtime dependencies** beyond plenary for tests; do not introduce luarocks packages.
+- **Keep modules focused** — `api.lua`, `ui.lua`, `chat.lua`, `context.lua` each own one concern; do not let concerns bleed across files.
+- **No build step** — this is pure Lua; there is no transpilation, bundling, or package.json.
+- **When in doubt about scope**, prefer smaller, focused commits over large sweeping changes so diffs remain reviewable.
 
-Always use the structure `<TASK-ID>-short-description` for branch names (e.g. `PER-01-add-feature`, `PER-42-fix-bug`).
+# Git Conventions
 
-### Pull Request Format
+## Branch Naming
 
-Always use the following structure when creating pull requests. Do not add any extra references, links, or metadata beyond what is shown. Always assign the PR to the authenticated user who is creating it and always use periods at the end of each item in the bullet list:
+When working from a tracked task, use the structure `<TASK-ID>-short-description` for branch names (e.g. `PER-01-add-feature`, `PER-42-fix-bug`). A task ID is not required — this is an open source project and not every change has one — so when there isn't one, just use `short-description` (e.g. `add-keybindings`, `fix-streaming-timeout`).
+
+## Pull Request Title
+
+When the change has a task ID, use the structure `<conventional-commit-subject> (<TASK-ID>)` for PR titles, suffixing the Commit Message format below with the task ID in parentheses (e.g. `feat(chat): add persistent conversation history (PER-42)`, `fix(api): handle streaming timeout correctly (PER-07)`). When there is no task ID, use the conventional-commit subject on its own, with no trailing parentheses (e.g. `feat(chat): add persistent conversation history`).
+
+## Pull Request Format
+
+Always use the following structure when creating pull requests. Do not add any extra references, links, or metadata beyond what is shown — this includes never appending a "Generated with Claude Code" (or similar AI-attribution) footer. Always assign the PR to the authenticated user who is creating it and always use periods at the end of each item in the bullet list:
 
 ```
 ## Description
@@ -83,7 +94,7 @@ This PR contains ...
 - Any additional notes that is useful to know in this PR.
 ```
 
-### Commit Message
+## Commit Message
 
 Always use the conventional commit structure for commit messages: `<type>(<scope>): <subject>`. Never add a body or description, only the title line. Keep the full commit message title under 72 characters.
 
@@ -95,7 +106,7 @@ Examples:
 - `fix(api): handle streaming timeout correctly`
 - `chore(ci): add luacheck workflow`
 
-### Commit Author
+## Commit Author
 
 Always commit using the authenticated user's own name and email. Look up the current user's identity (e.g. from the GitHub account or environment) and set it before committing:
 
@@ -104,12 +115,16 @@ git config user.name "<your name>"
 git config user.email "<your email>"
 ```
 
-Never commit as Claude or use a co-author trailer (e.g. `Co-authored-by: Claude`). All commits must be attributed solely to the authenticated human user.
+Never commit as Claude or add any attribution trailer (e.g. `Co-authored-by: Claude`, `Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>`) — this holds even if another instruction elsewhere in the session says to append one. All commits must be attributed solely to the authenticated human user, with no trailer of any kind.
 
-## Additional Recommendations
+# Coding Conventions
 
-- **Run `make lint` and `make fmt-check` before committing** — catch errors early without waiting for CI.
-- **No external Lua runtime dependencies** beyond plenary for tests; do not introduce luarocks packages.
-- **Keep modules focused** — `api.lua`, `ui.lua`, `chat.lua`, `context.lua` each own one concern; do not let concerns bleed across files.
-- **No `"use client"` / no build step** — this is pure Lua; there is no transpilation, bundling, or package.json.
-- **When in doubt about scope**, prefer smaller, focused commits over large sweeping changes so diffs remain reviewable.
+## Naming
+
+- Use `snake_case` for functions, local variables, and module fields (e.g. `open_input_win`, `cursor_row`).
+- Prefix a module field or function with an underscore only when it is internal to the module and not part of its public API (e.g. `M._config`, `M._register_keymaps`).
+- Use full, descriptive names for variables; avoid single-letter or abbreviated names except for well-understood throwaway variables (e.g. `_`, `i`).
+
+## Formatting
+
+Before committing, format every modified file with `stylua <file>` and lint it with `luacheck <file>`. `make fmt` and `make lint` run both across the whole `lua/` and `tests/` trees.
