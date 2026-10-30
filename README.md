@@ -8,6 +8,7 @@ An inline AI coding assistant for Neovim. Press `<leader>aa` to open a floating 
 - **Streaming preview**: generated tokens appear as virtual-text below the cursor while the model is still writing
 - **Visual-mode replacement**: select code, press `<leader>aa`, describe what to change; the selection is replaced in-place
 - **Normal-mode insertion**: with no selection, new code is inserted below the cursor
+- **Pre-defined prompts**: `<leader>ae`, `<leader>as`, and `<leader>ai` explain, spellcheck, or improve the current line or visual selection without typing a prompt
 - **Live spinner**: a progress indicator shows while the request is in flight
 - **Chat mode**: a persistent two-pane window for multi-turn conversations with the model
 - **File context**: attach additional files to every AI request via telescope so the model is aware of code outside the current buffer
@@ -88,6 +89,9 @@ require("nudge").setup({
     prompt      = "<leader>aa",  -- open the inline prompt (normal + visual)
     chat        = "<leader>ac",  -- open the persistent chat window
     add_context = "<leader>af",  -- add or manage context files via telescope
+    explain     = "<leader>ae",  -- explain the current line or selection
+    spellcheck  = "<leader>as",  -- spellcheck the current line or selection
+    improve     = "<leader>ai",  -- improve the current line or selection
     submit      = "<CR>",        -- confirm in the input window
     close       = "<Esc>",       -- dismiss the input window
   },
@@ -100,6 +104,14 @@ require("nudge").setup({
     width            = 0.6,         -- fraction of editor columns
     spinner_frames   = { "⠋","⠙","⠹","⠸","⠼","⠴","⠦","⠧","⠇","⠏" },
     spinner_interval = 80,          -- ms between spinner frames
+  },
+
+  -- Pre-defined prompts, triggered by their matching keymaps above, run
+  -- against the current line (normal mode) or the visual selection.
+  prompts = {
+    explain    = "Explain what this code does.",
+    spellcheck = "Fix any spelling or grammar mistakes in comments, strings, and identifiers.",
+    improve    = "Improve this code for clarity and readability without changing its behavior.",
   },
 
   -- System prompt sent on every inline-prompt and question request --------
@@ -163,6 +175,12 @@ Your active subscription (Claude Code subscription, API credits, etc.) is used a
 | Visual | `<leader>aa` | Open inline prompt, replace selected lines with generated code |
 | Normal | `<leader>ac` | Open the persistent chat window                                |
 | Normal | `<leader>af` | Add files to context or manage the current context file list   |
+| Normal | `<leader>ae` | Explain the current line                                       |
+| Visual | `<leader>ae` | Explain the selection                                          |
+| Normal | `<leader>as` | Spellcheck the current line                                    |
+| Visual | `<leader>as` | Spellcheck the selection                                       |
+| Normal | `<leader>ai` | Improve the current line                                       |
+| Visual | `<leader>ai` | Improve the selection                                          |
 | Input  | `<Enter>`    | Submit the prompt                                              |
 | Input  | `<Esc>`      | Cancel or close the window                                     |
 
@@ -175,6 +193,9 @@ Your active subscription (Claude Code subscription, API credits, etc.) is used a
 | `:NudgeChatClear`    | Clear the chat history for the current session    |
 | `:NudgeContext`      | Add or manage context files via telescope         |
 | `:NudgeContextClear` | Clear all context files without opening telescope |
+| `:NudgeExplain`      | Explain the current line                          |
+| `:NudgeSpellcheck`   | Spellcheck the current line                       |
+| `:NudgeImprove`      | Improve the current line                          |
 
 ### File context
 
@@ -212,6 +233,10 @@ convert to use async/await and add proper error handling
 ```
 
 Press `<Enter>`. The selection is replaced.
+
+**Explain, spellcheck, or improve a line or selection**
+
+Place your cursor on a line (or select a block with `V`), then press `<leader>ae` to explain it in the chat window, `<leader>as` to fix spelling/grammar in-place, or `<leader>ai` to improve it in-place. No prompt typing required.
 
 **Chat with the model**
 

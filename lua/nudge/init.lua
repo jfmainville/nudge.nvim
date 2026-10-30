@@ -40,6 +40,34 @@ function M._register_keymaps()
 		vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "nx", false)
 		ui.open_prompt(M._config, true, sr, er)
 	end, { desc = "Nudge: AI inline prompt (visual)" })
+
+	for _, action in ipairs({ "explain", "spellcheck", "improve" }) do
+		M._register_predefined_keymap(action)
+	end
+end
+
+-- Registers the normal- and visual-mode keymaps for a pre-defined prompt
+-- action (e.g. "explain"), mirroring the capture/replay pattern used by the
+-- inline prompt's visual-mode keymap above.
+function M._register_predefined_keymap(action)
+	local key = M._config.keymaps[action]
+	if not key or key == "" then
+		return
+	end
+
+	vim.keymap.set("n", key, function()
+		ui.run_predefined(M._config, action, false)
+	end, { desc = "Nudge: " .. action .. " current line" })
+
+	vim.keymap.set("x", key, function()
+		local sr = vim.fn.line("v")
+		local er = vim.fn.line(".")
+		if sr > er then
+			sr, er = er, sr
+		end
+		vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<Esc>", true, false, true), "nx", false)
+		ui.run_predefined(M._config, action, true, sr, er)
+	end, { desc = "Nudge: " .. action .. " selection" })
 end
 
 return M

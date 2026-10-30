@@ -32,7 +32,7 @@ end
 
 function Spinner:_place()
 	local opts = {
-		virt_text = { { self.frames[self.frame] .. " Generating…", "Comment" } },
+		virt_text = { { self.frames[self.frame] .. " Nudging…", "Comment" } },
 		virt_text_pos = "eol",
 	}
 	if self.mark_id then
@@ -303,6 +303,73 @@ function M.open_prompt(config, is_visual, vis_sr, vis_er)
 		once = true,
 		callback = on_cancel,
 	})
+end
+
+-- ---------------------------------------------------------------------------
+-- Public: run_predefined
+-- ---------------------------------------------------------------------------
+
+---@param config table      Resolved nudge config
+---@param action string     Key into config.prompts ("explain" | "spellcheck" | "improve")
+---@param is_visual boolean Whether called from visual mode
+---@param vis_sr number|nil Visual selection start row (1-indexed), set by keymap before Esc
+---@param vis_er number|nil Visual selection end row (1-indexed)
+function M.run_predefined(config, action, is_visual, vis_sr, vis_er)
+	local prompt = config.prompts[action]
+	if not prompt then
+		vim.notify("Nudge: no prompt configured for '" .. action .. "'", vim.log.levels.WARN)
+		return
+	end
+
+	local target_buf = vim.api.nvim_get_current_buf()
+	local cursor_row = vim.api.nvim_win_get_cursor(0)[1]
+	local filetype = vim.bo[target_buf].filetype or ""
+
+	local raw_name = vim.api.nvim_buf_get_name(target_buf)
+	local file_name = raw_name ~= "" and vim.fn.fnamemodify(raw_name, ":~:.") or ""
+	local file_lines = vim.api.nvim_buf_get_lines(target_buf, 0, -1, false)
+	local file_content = table.concat(file_lines, "\n")
+
+	local sel_sr, sel_er
+	if is_visual and vis_sr and vis_er then
+		sel_sr, sel_er = vis_sr, vis_er
+	else
+		sel_sr, sel_er = cursor_row, cursor_row
+	end
+	local context = get_visual_lines(target_buf, sel_sr, sel_er)
+
+	local file_ctx = {
+		name = file_name,
+		content = file_content,
+		cursor_row = cursor_row,
+		sel_sr = sel_sr,
+		sel_er = sel_er,
+		is_file_edit = false,
+	}
+	local context_files = ctx_module.get_file_contents()
+
+	if action == "explain" then
+		question.open(config, prompt, context, filetype, file_ctx, context_files)
+		return
+	end
+
+	local messages = api.build_messages(prompt, context, filetype, file_ctx, context_files)
+	local spinner = Spinner.new(target_buf, cursor_row, config.ui.spinner_frames, config.ui.spinner_interval)
+	local preview_id = nil
+	local accumulated = ""
+
+	api.stream(config, messages, function(token)
+		accumulated = accumulated .. token
+		preview_id = set_preview(target_buf, cursor_row, accumulated, preview_id)
+	end, function()
+		spinner:stop()
+		clear_mark(target_buf, preview_id)
+		apply_result(target_buf, accumulated, "replace_selection", sel_sr, sel_er, cursor_row)
+	end, function(err)
+		spinner:stop()
+		clear_mark(target_buf, preview_id)
+		vim.notify("Nudge: " .. err, vim.log.levels.ERROR)
+	end)
 end
 
 return M

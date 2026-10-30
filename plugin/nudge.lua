@@ -41,3 +41,24 @@ vim.api.nvim_create_user_command("NudgeContextClear", function()
 	require("nudge.context").clear()
 	vim.notify("Nudge: context cleared", vim.log.levels.INFO)
 end, { desc = "Clear all Nudge context files" })
+
+vim.api.nvim_create_user_command("NudgeExplain", function()
+	local cfg = assert_setup()
+	if cfg then
+		require("nudge.ui").run_predefined(cfg, "explain", false)
+	end
+end, { desc = "Explain the current line" })
+
+vim.api.nvim_create_user_command("NudgeSpellcheck", function()
+	local cfg = assert_setup()
+	if cfg then
+		require("nudge.ui").run_predefined(cfg, "spellcheck", false)
+	end
+end, { desc = "Spellcheck the current line" })
+
+vim.api.nvim_create_user_command("NudgeImprove", function()
+	local cfg = assert_setup()
+	if cfg then
+		require("nudge.ui").run_predefined(cfg, "improve", false)
+	end
+end, { desc = "Improve the current line" })

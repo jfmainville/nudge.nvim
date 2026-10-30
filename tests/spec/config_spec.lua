@@ -34,6 +34,20 @@ describe("nudge.config", function()
 			assert.is_string(config.defaults.keymaps.prompt)
 			assert.truthy(#config.defaults.keymaps.prompt > 0)
 		end)
+
+		it("has keymaps defined for all pre-defined prompt actions", function()
+			for _, action in ipairs({ "explain", "spellcheck", "improve" }) do
+				assert.is_string(config.defaults.keymaps[action])
+				assert.truthy(#config.defaults.keymaps[action] > 0)
+			end
+		end)
+
+		it("has a non-empty prompt for each pre-defined prompt action", function()
+			for _, action in ipairs({ "explain", "spellcheck", "improve" }) do
+				assert.is_string(config.defaults.prompts[action])
+				assert.truthy(#config.defaults.prompts[action] > 0)
+			end
+		end)
 	end)
 
 	describe("resolve()", function()
@@ -81,6 +95,14 @@ describe("nudge.config", function()
 		it("accepts api_key in auth table", function()
 			local resolved = config.resolve({ auth = { api_key = "sk-test-key" } })
 			assert.equals("sk-test-key", resolved.auth.api_key)
+		end)
+
+		it("allows overriding a pre-defined prompt", function()
+			local custom = "Explain like I'm five"
+			local resolved = config.resolve({ prompts = { explain = custom } })
+			assert.equals(custom, resolved.prompts.explain)
+			-- untouched defaults still present
+			assert.equals(config.defaults.prompts.spellcheck, resolved.prompts.spellcheck)
 		end)
 	end)
 end)
